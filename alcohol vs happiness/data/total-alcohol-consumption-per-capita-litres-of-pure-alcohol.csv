@@ -1,4 +1,4 @@
-Entity,Code,Year,"Total alcohol consumption per capita (liters of pure alcohol, projected estimates, 15+ years of age)"
+Entity,Code,Year,alcohol_consumption
 Afghanistan,AFG,2000,0.003
 Afghanistan,AFG,2001,0.003
 Afghanistan,AFG,2002,0.007
