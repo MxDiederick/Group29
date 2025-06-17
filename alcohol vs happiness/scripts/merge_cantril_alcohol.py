@@ -1,7 +1,7 @@
 import pandas as pd
 
-df_centril = pd.read_csv('data/happiness-cantril-ladder.csv')
-df_alcohol = pd.read_csv('data/total-alcohol-consumption-per-capita-litres-of-pure-alcohol.csv')
+df_centril = pd.read_csv('alcohol vs happiness/data/happiness-cantril-ladder.csv')
+df_alcohol = pd.read_csv('alcohol vs happiness/data/total-alcohol-consumption-per-capita-litres-of-pure-alcohol.csv')
 
 print(df_centril.columns)
 print(df_alcohol.columns)
@@ -17,4 +17,4 @@ df_merged = pd.merge(
 print(f"Samengevoegd: {df_merged.shape[0]} rijen × {df_merged.shape[1]} kolommen")
 print(df_merged.head())
 
-df_merged.to_csv('data/merged_centril_alcohol.csv', index=False)
+df_merged.to_csv('alcohol vs happiness/data/merged_cantril_alcohol.csv', index=False)
