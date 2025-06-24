@@ -1,7 +1,7 @@
 import pandas as pd
 
-df_centril = pd.read_csv('alcohol vs happiness/data/happiness-cantril-ladder.csv')
-df_alcohol = pd.read_csv('alcohol vs happiness/data/total-alcohol-consumption-per-capita-litres-of-pure-alcohol.csv')
+df_centril = pd.read_csv('alcohol vs happiness/data/clean_centril.csv')
+df_alcohol = pd.read_csv('alcohol vs happiness/data/clean_alcohol.csv')
 
 print(df_centril.columns)
 print(df_alcohol.columns)

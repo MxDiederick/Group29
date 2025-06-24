@@ -1,7 +1,7 @@
 import pandas as pd
 
-df_mental = pd.read_csv('alcohol vs happiness/data/1-mental-illnesses-prevalence.csv')
-df_alcohol = pd.read_csv('alcohol vs happiness/data/total-alcohol-consumption-per-capita-litres-of-pure-alcohol.csv')
+df_mental = pd.read_csv('alcohol vs happiness/data/clean_mental.csv')
+df_alcohol = pd.read_csv('alcohol vs happiness/data/clean_alcohol.csv')
 
 print(df_mental.columns)
 print(df_alcohol.columns)
