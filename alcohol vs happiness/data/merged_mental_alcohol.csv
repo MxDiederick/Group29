@@ -1,4 +1,4 @@
-Entity,Year,Depressive_disorders,Anxiety_disorders,Eating_disorders,alcohol_consumption
+Entity,Year,Depressive_disorders,Anxiety_disorders,Eating_disorders,Alcohol_consumption
 Afghanistan,2000,5.0084476,4.6768804,0.09487554,0.003
 Afghanistan,2001,5.0038724,4.675786,0.09454673,0.003
 Afghanistan,2002,4.994327,4.6720624,0.09481004,0.007
