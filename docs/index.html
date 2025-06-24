@@ -8188,159 +8188,166 @@ Een invloedrijke reviewstudie van Baum-Baicker (1985) concludeert dat matig alco
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d2f1c10d">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e8e3f501">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<details>
+<summary><strong>Bekijk de code</strong></summary>
+<pre><code>
+# Dataset laden
+df = pd.read_csv("alcohol vs happiness/data/merged_all.csv")
+
+mental_vars = [
+    "Schizophrenia_disorders",
+    "Depressive_disorders",
+    "Anxiety_disorders",
+    "Bipolar_disorders",
+    "Eating_disorders"
+]
+mental_labels = [
+    "Schizofrenie stoornissen",
+    "Depressie stoornissen",
+    "Angst stoornissen",
+    "Bipolaire stoornissen",
+    "Eet stoornissen"
+]
+colors = ["#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A"]
+
+# Selecteer relevante kolommen en verwijder rijen met missende waarden
+df_clean = df[["Entity", "Year", "Alcohol_consumption"] + mental_vars].dropna()
+
+fig = go.Figure()
+buttons = []
+
+for i, var in enumerate(mental_vars):
+    x = df_clean["Alcohol_consumption"]
+    y = df_clean[var]
+    country = df_clean["Entity"]
+    year = df_clean["Year"]
+
+    # Pearson correlatie
+    corr, _ = stats.pearsonr(x, y)
+    corr_text = f"<b>{var}</b><br/>Pearson r = {corr:.2f}"
+
+    # Regressielijn
+    slope, intercept, _, _, std_err = stats.linregress(x, y)
+    reg_x = np.linspace(x.min(), x.max(), 100)
+    reg_y = slope * reg_x + intercept
+    y_err = std_err * 1.96
+    upper = reg_y + y_err
+    lower = reg_y - y_err
+    rgba = f'rgba{tuple(int(colors[i].lstrip("#")[j:j+2], 16) for j in (0, 2, 4)) + (0.2,)}'
+
+    # Punten met hoverinfo
+    fig.add_trace(go.Scatter(
+        x=x, y=y, mode="markers",
+        marker=dict(size=4, color=colors[i]),
+        name=var,
+        visible=(i == 0),
+        text=[f"{c}, {y}" for c, y in zip(country, year)],
+        hovertemplate="<b>%{text}</b><br/>Alcohol: %{x}<br/>Prevalentie: %{y}<extra></extra>"
+    ))
+
+    # CI bovenlijn
+    fig.add_trace(go.Scatter(
+        x=reg_x, y=upper, mode="lines",
+        line=dict(width=0), hoverinfo="skip",
+        visible=(i == 0), showlegend=False
+    ))
+
+    # CI onderlijn met fill
+    fig.add_trace(go.Scatter(
+        x=reg_x, y=lower, mode="lines",
+        fill="tonexty", fillcolor=rgba,
+        line=dict(width=0), hoverinfo="skip",
+        visible=(i == 0), showlegend=False
+    ))
+
+    # Regressielijn
+    fig.add_trace(go.Scatter(
+        x=reg_x, y=reg_y, mode="lines",
+        line=dict(color="black", width=3),
+        name=f"{var} regressielijn",
+        visible=(i == 0)
+    ))
+
+    # Visibility logica
+    vis = [False] * (4 * len(mental_vars))
+    for j in range(4):
+        vis[i * 4 + j] = True
+
+    # Annotations vervangen per selectie
+    buttons.append(dict(
+        label=var,
+        method="update",
+        args=[
+            {"visible": vis},
+            {
+                "title": f"Alcoholgebruik vs {mental_labels[i]}",
+                "annotations": [dict(
+                    x=1.03, y=0.8,
+                    xref="paper", yref="paper",
+                    text=corr_text,
+                    showarrow=False,
+                    align="left",
+                    font=dict(size=13),
+                    xanchor="left"
+                )]
+            }
+        ]
+    ))
+
+# Begin-annotatie (eerste variabele)
+initial_corr, _ = stats.pearsonr(df_clean["Alcohol_consumption"], df_clean[mental_vars[0]])
+initial_text = f"<b>{mental_labels[0]}</b><br/>Pearson r = {initial_corr:.2f}"
+
+fig.update_layout(
+    title=f"Alcoholgebruik vs {mental_labels[0]}",  
+    xaxis_title="Alcoholgebruik (liters per capita)",
+    yaxis_title="Prevalentie (%)",
+    updatemenus=[dict(
+        buttons=buttons,
+        direction="down",
+        showactive=True,
+        x=1.03, y=0.6,
+        xanchor="left", yanchor="top"
+    )],
+    annotations=[dict(
+        x=1.03, y=0.8,
+        xref="paper", yref="paper",
+        text=initial_text,
+        showarrow=False,
+        align="left",
+        font=dict(size=13),
+        xanchor="left"
+    )],
+    height=500,
+    margin=dict(t=80, r=160, b=60, l=60)  # extra ruimte rechts voor tekst
+)
+
+fig.show()
+
+fig.write_html("docs/scatter1.html", include_plotlyjs="cdn")
+  </code></pre>
+</details>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d2f1c10d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Dataset laden</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"alcohol vs happiness/data/merged_all.csv"</span><span class="p">)</span>
-
-<span class="n">mental_vars</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">"Schizophrenia_disorders"</span><span class="p">,</span>
-    <span class="s2">"Depressive_disorders"</span><span class="p">,</span>
-    <span class="s2">"Anxiety_disorders"</span><span class="p">,</span>
-    <span class="s2">"Bipolar_disorders"</span><span class="p">,</span>
-    <span class="s2">"Eating_disorders"</span>
-<span class="p">]</span>
-<span class="n">mental_labels</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">"Schizofrenie stoornissen"</span><span class="p">,</span>
-    <span class="s2">"Depressie stoornissen"</span><span class="p">,</span>
-    <span class="s2">"Angst stoornissen"</span><span class="p">,</span>
-    <span class="s2">"Bipolaire stoornissen"</span><span class="p">,</span>
-    <span class="s2">"Eet stoornissen"</span>
-<span class="p">]</span>
-<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"#636EFA"</span><span class="p">,</span> <span class="s2">"#EF553B"</span><span class="p">,</span> <span class="s2">"#00CC96"</span><span class="p">,</span> <span class="s2">"#AB63FA"</span><span class="p">,</span> <span class="s2">"#FFA15A"</span><span class="p">]</span>
-
-<span class="c1"># Selecteer relevante kolommen en verwijder rijen met missende waarden</span>
-<span class="n">df_clean</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s2">"Entity"</span><span class="p">,</span> <span class="s2">"Year"</span><span class="p">,</span> <span class="s2">"Alcohol_consumption"</span><span class="p">]</span> <span class="o">+</span> <span class="n">mental_vars</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
-
-<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
-<span class="n">buttons</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mental_vars</span><span class="p">):</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">df_clean</span><span class="p">[</span><span class="s2">"Alcohol_consumption"</span><span class="p">]</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">df_clean</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-    <span class="n">country</span> <span class="o">=</span> <span class="n">df_clean</span><span class="p">[</span><span class="s2">"Entity"</span><span class="p">]</span>
-    <span class="n">year</span> <span class="o">=</span> <span class="n">df_clean</span><span class="p">[</span><span class="s2">"Year"</span><span class="p">]</span>
-
-    <span class="c1"># Pearson correlatie</span>
-    <span class="n">corr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-    <span class="n">corr_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"&lt;b&gt;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2">&lt;/b&gt;&lt;br&gt;Pearson r = </span><span class="si">{</span><span class="n">corr</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span>
-
-    <span class="c1"># Regressielijn</span>
-    <span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">std_err</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">linregress</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-    <span class="n">reg_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mi">100</span><span class="p">)</span>
-    <span class="n">reg_y</span> <span class="o">=</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">reg_x</span> <span class="o">+</span> <span class="n">intercept</span>
-    <span class="n">y_err</span> <span class="o">=</span> <span class="n">std_err</span> <span class="o">*</span> <span class="mf">1.96</span>
-    <span class="n">upper</span> <span class="o">=</span> <span class="n">reg_y</span> <span class="o">+</span> <span class="n">y_err</span>
-    <span class="n">lower</span> <span class="o">=</span> <span class="n">reg_y</span> <span class="o">-</span> <span class="n">y_err</span>
-    <span class="n">rgba</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'rgba</span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"#"</span><span class="p">)[</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="mi">16</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="mf">0.2</span><span class="p">,)</span><span class="si">}</span><span class="s1">'</span>
-
-    <span class="c1"># Punten met hoverinfo</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
-        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"markers"</span><span class="p">,</span>
-        <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">var</span><span class="p">,</span>
-        <span class="n">visible</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span>
-        <span class="n">text</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">year</span><span class="p">)],</span>
-        <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">"&lt;b&gt;%</span><span class="si">{text}</span><span class="s2">&lt;/b&gt;&lt;br&gt;Alcohol: %</span><span class="si">{x}</span><span class="s2">&lt;br&gt;Prevalentie: %</span><span class="si">{y}</span><span class="s2">&lt;extra&gt;&lt;/extra&gt;"</span>
-    <span class="p">))</span>
-
-    <span class="c1"># CI bovenlijn</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
-        <span class="n">x</span><span class="o">=</span><span class="n">reg_x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">upper</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines"</span><span class="p">,</span>
-        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">"skip"</span><span class="p">,</span>
-        <span class="n">visible</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span>
-    <span class="p">))</span>
-
-    <span class="c1"># CI onderlijn met fill</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
-        <span class="n">x</span><span class="o">=</span><span class="n">reg_x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">lower</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines"</span><span class="p">,</span>
-        <span class="n">fill</span><span class="o">=</span><span class="s2">"tonexty"</span><span class="p">,</span> <span class="n">fillcolor</span><span class="o">=</span><span class="n">rgba</span><span class="p">,</span>
-        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">"skip"</span><span class="p">,</span>
-        <span class="n">visible</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span>
-    <span class="p">))</span>
-
-    <span class="c1"># Regressielijn</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
-        <span class="n">x</span><span class="o">=</span><span class="n">reg_x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">reg_y</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines"</span><span class="p">,</span>
-        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2"> regressielijn"</span><span class="p">,</span>
-        <span class="n">visible</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="p">))</span>
-
-    <span class="c1"># Visibility logica</span>
-    <span class="n">vis</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">mental_vars</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
-        <span class="n">vis</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="c1"># Annotations vervangen per selectie</span>
-    <span class="n">buttons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
-        <span class="n">label</span><span class="o">=</span><span class="n">var</span><span class="p">,</span>
-        <span class="n">method</span><span class="o">=</span><span class="s2">"update"</span><span class="p">,</span>
-        <span class="n">args</span><span class="o">=</span><span class="p">[</span>
-            <span class="p">{</span><span class="s2">"visible"</span><span class="p">:</span> <span class="n">vis</span><span class="p">},</span>
-            <span class="p">{</span>
-                <span class="s2">"title"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Alcoholgebruik vs </span><span class="si">{</span><span class="n">mental_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-                <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span>
-                    <span class="n">x</span><span class="o">=</span><span class="mf">1.03</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
-                    <span class="n">xref</span><span class="o">=</span><span class="s2">"paper"</span><span class="p">,</span> <span class="n">yref</span><span class="o">=</span><span class="s2">"paper"</span><span class="p">,</span>
-                    <span class="n">text</span><span class="o">=</span><span class="n">corr_text</span><span class="p">,</span>
-                    <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">align</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span>
-                    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">13</span><span class="p">),</span>
-                    <span class="n">xanchor</span><span class="o">=</span><span class="s2">"left"</span>
-                <span class="p">)]</span>
-            <span class="p">}</span>
-        <span class="p">]</span>
-    <span class="p">))</span>
-
-<span class="c1"># Begin-annotatie (eerste variabele)</span>
-<span class="n">initial_corr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">df_clean</span><span class="p">[</span><span class="s2">"Alcohol_consumption"</span><span class="p">],</span> <span class="n">df_clean</span><span class="p">[</span><span class="n">mental_vars</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
-<span class="n">initial_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"&lt;b&gt;</span><span class="si">{</span><span class="n">mental_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&lt;/b&gt;&lt;br&gt;Pearson r = </span><span class="si">{</span><span class="n">initial_corr</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span>
-
-<span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
-    <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Alcoholgebruik vs </span><span class="si">{</span><span class="n">mental_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>  
-    <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">"Alcoholgebruik (liters per capita)"</span><span class="p">,</span>
-    <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">"Prevalentie (%)"</span><span class="p">,</span>
-    <span class="n">updatemenus</span><span class="o">=</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span>
-        <span class="n">buttons</span><span class="o">=</span><span class="n">buttons</span><span class="p">,</span>
-        <span class="n">direction</span><span class="o">=</span><span class="s2">"down"</span><span class="p">,</span>
-        <span class="n">showactive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">x</span><span class="o">=</span><span class="mf">1.03</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
-        <span class="n">xanchor</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span> <span class="n">yanchor</span><span class="o">=</span><span class="s2">"top"</span>
-    <span class="p">)],</span>
-    <span class="n">annotations</span><span class="o">=</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span>
-        <span class="n">x</span><span class="o">=</span><span class="mf">1.03</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
-        <span class="n">xref</span><span class="o">=</span><span class="s2">"paper"</span><span class="p">,</span> <span class="n">yref</span><span class="o">=</span><span class="s2">"paper"</span><span class="p">,</span>
-        <span class="n">text</span><span class="o">=</span><span class="n">initial_text</span><span class="p">,</span>
-        <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">align</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span>
-        <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">13</span><span class="p">),</span>
-        <span class="n">xanchor</span><span class="o">=</span><span class="s2">"left"</span>
-    <span class="p">)],</span>
-    <span class="n">height</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-    <span class="n">margin</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">160</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>  <span class="c1"># extra ruimte rechts voor tekst</span>
-<span class="p">)</span>
-
-<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-<span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="s2">"docs/scatter1.html"</span><span class="p">,</span> <span class="n">include_plotlyjs</span><span class="o">=</span><span class="s2">"cdn"</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span>
 </pre></div>
 </div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 </div>
 </div>
 </div>
@@ -8352,7 +8359,7 @@ Een invloedrijke reviewstudie van Baum-Baicker (1985) concludeert dat matig alco
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <ul>
-<li>Klik hier voor de scatterplot:📈 <a href="scatter1.html">Scatterplot: Alcoholgebruik vs Cantril ladder score</a></li>
+<li>Klik hier voor de scatterplot:📈 <a href="scatter1.html">Scatterplot: Alcoholgebruik vs Mentale stoornissen</a></li>
 </ul>
 </div>
 </div>
@@ -8403,98 +8410,92 @@ Onderzoek van de Universiteit van Oxford suggereert dat matig alcoholgebruik, wa
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a20b8e00">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a20b8e00">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Opschonen</span>
-<span class="n">df_clean</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s2">"Entity"</span><span class="p">,</span> <span class="s2">"Year"</span><span class="p">,</span> <span class="s2">"Alcohol_consumption"</span><span class="p">,</span> <span class="s2">"Cantril ladder score"</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<details>
+<summary><strong>Bekijk de code</strong></summary>
+<pre><code>
+# Opschonen
+df_clean = df[["Entity", "Year", "Alcohol_consumption", "Cantril ladder score"]].dropna()
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">df_clean</span><span class="p">[</span><span class="s2">"Alcohol_consumption"</span><span class="p">]</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">df_clean</span><span class="p">[</span><span class="s2">"Cantril ladder score"</span><span class="p">]</span>
-<span class="n">country</span> <span class="o">=</span> <span class="n">df_clean</span><span class="p">[</span><span class="s2">"Entity"</span><span class="p">]</span>
-<span class="n">year</span> <span class="o">=</span> <span class="n">df_clean</span><span class="p">[</span><span class="s2">"Year"</span><span class="p">]</span>
+x = df_clean["Alcohol_consumption"]
+y = df_clean["Cantril ladder score"]
+country = df_clean["Entity"]
+year = df_clean["Year"]
 
-<span class="c1"># Regressie en CI</span>
-<span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">std_err</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">linregress</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="n">reg_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mi">100</span><span class="p">)</span>
-<span class="n">reg_y</span> <span class="o">=</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">reg_x</span> <span class="o">+</span> <span class="n">intercept</span>
-<span class="n">y_err</span> <span class="o">=</span> <span class="n">std_err</span> <span class="o">*</span> <span class="mf">1.96</span>
-<span class="n">upper</span> <span class="o">=</span> <span class="n">reg_y</span> <span class="o">+</span> <span class="n">y_err</span>
-<span class="n">lower</span> <span class="o">=</span> <span class="n">reg_y</span> <span class="o">-</span> <span class="n">y_err</span>
+# Regressie en CI
+slope, intercept, _, _, std_err = stats.linregress(x, y)
+reg_x = np.linspace(x.min(), x.max(), 100)
+reg_y = slope * reg_x + intercept
+y_err = std_err * 1.96
+upper = reg_y + y_err
+lower = reg_y - y_err
 
-<span class="c1"># Correlatie berekenen</span>
-<span class="n">corr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="n">corr_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"&lt;b&gt;Cantril ladder score&lt;/b&gt;&lt;br&gt;Pearson r = </span><span class="si">{</span><span class="n">corr</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span>
+# Correlatie berekenen
+corr, _ = stats.pearsonr(x, y)
+corr_text = f"<b>Cantril ladder score</b><br/>Pearson r = {corr:.2f}"
 
-<span class="c1"># Plot bouwen</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+# Plot bouwen
+fig = go.Figure()
 
-<span class="c1"># Punten</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"markers"</span><span class="p">,</span>
-    <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#00CC96"</span><span class="p">),</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">"Cantril ladder score"</span><span class="p">,</span>
-    <span class="n">text</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">year</span><span class="p">)],</span>
-    <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">"&lt;b&gt;%</span><span class="si">{text}</span><span class="s2">&lt;/b&gt;&lt;br&gt;Alcohol: %</span><span class="si">{x}</span><span class="s2">&lt;br&gt;Score: %</span><span class="si">{y}</span><span class="s2">&lt;extra&gt;&lt;/extra&gt;"</span>
-<span class="p">))</span>
+# Punten
+fig.add_trace(go.Scatter(
+    x=x, y=y, mode="markers",
+    marker=dict(size=4, color="#00CC96"),
+    name="Cantril ladder score",
+    text=[f"{c}, {y}" for c, y in zip(country, year)],
+    hovertemplate="<b>%{text}</b><br/>Alcohol: %{x}<br/>Score: %{y}<extra></extra>"
+))
 
-<span class="c1"># Bovenlijn CI</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="n">reg_x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">upper</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines"</span><span class="p">,</span>
-    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">"skip"</span><span class="p">,</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span>
-<span class="p">))</span>
+# Bovenlijn CI
+fig.add_trace(go.Scatter(
+    x=reg_x, y=upper, mode="lines",
+    line=dict(width=0), hoverinfo="skip", showlegend=False
+))
 
-<span class="c1"># Onderlijn CI met fill</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="n">reg_x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">lower</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines"</span><span class="p">,</span>
-    <span class="n">fill</span><span class="o">=</span><span class="s2">"tonexty"</span><span class="p">,</span> <span class="n">fillcolor</span><span class="o">=</span><span class="s1">'rgba(0, 0, 0, 0.2)'</span><span class="p">,</span>
-    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">"skip"</span><span class="p">,</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span>
-<span class="p">))</span>
+# Onderlijn CI met fill
+fig.add_trace(go.Scatter(
+    x=reg_x, y=lower, mode="lines",
+    fill="tonexty", fillcolor='rgba(0, 0, 0, 0.2)',
+    line=dict(width=0), hoverinfo="skip", showlegend=False
+))
 
-<span class="c1"># Regressielijn (zwart)</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="n">reg_x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">reg_y</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines"</span><span class="p">,</span>
-    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">"Regressielijn"</span>
-<span class="p">))</span>
+# Regressielijn (zwart)
+fig.add_trace(go.Scatter(
+    x=reg_x, y=reg_y, mode="lines",
+    line=dict(color="black", width=3),
+    name="Regressielijn"
+))
 
-<span class="c1"># Layout &amp; annotatie</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">"Alcoholgebruik vs Cantril ladder score"</span><span class="p">,</span>
-    <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">"Alcoholgebruik (liters per capita)"</span><span class="p">,</span>
-    <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">"Centril ladder score (1-10)"</span><span class="p">,</span>
-    <span class="n">annotations</span><span class="o">=</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span>
-        <span class="n">x</span><span class="o">=</span><span class="mf">1.03</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
-        <span class="n">xref</span><span class="o">=</span><span class="s2">"paper"</span><span class="p">,</span> <span class="n">yref</span><span class="o">=</span><span class="s2">"paper"</span><span class="p">,</span>
-        <span class="n">text</span><span class="o">=</span><span class="n">corr_text</span><span class="p">,</span>
-        <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">align</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span>
-        <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">13</span><span class="p">),</span>
-        <span class="n">xanchor</span><span class="o">=</span><span class="s2">"left"</span>
-    <span class="p">)],</span>
-    <span class="n">height</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-    <span class="n">margin</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">160</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
-<span class="p">)</span>
+# Layout &amp; annotatie
+fig.update_layout(
+    title="Alcoholgebruik vs Cantril ladder score",
+    xaxis_title="Alcoholgebruik (liters per capita)",
+    yaxis_title="Centril ladder score (1-10)",
+    annotations=[dict(
+        x=1.03, y=0.8,
+        xref="paper", yref="paper",
+        text=corr_text,
+        showarrow=False,
+        align="left",
+        font=dict(size=13),
+        xanchor="left"
+    )],
+    height=500,
+    margin=dict(t=80, r=160, b=60, l=60)
+)
 
-<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+fig.show()
 
-<span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="s2">"docs/scatter2.html"</span><span class="p">,</span> <span class="n">include_plotlyjs</span><span class="o">=</span><span class="s2">"cdn"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+fig.write_html("docs/scatter2.html", include_plotlyjs="cdn")
+</code></pre>
+</details>
+<p>📈 <a href="scatter1.html">Klik hier voor de interactieve plot</a></p>
 </div>
 </div>
 </div>
@@ -8506,7 +8507,7 @@ Onderzoek van de Universiteit van Oxford suggereert dat matig alcoholgebruik, wa
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <ul>
-<li>Klik hier voor de scatterplot:📊 <a href="scatter2.html">Scatterplot: Alcoholgebruik vs Angststoornissen</a></li>
+<li>Klik hier voor de scatterplot:📊 <a href="scatter2.html">Scatterplot: Alcoholgebruik vs Centril ladder score</a></li>
 </ul>
 </div>
 </div>
@@ -8562,9 +8563,9 @@ Onderzoek van de Universiteit van Oxford suggereert dat matig alcoholgebruik, wa
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Perspectief-1:-Inkomensongelijkheid">Perspectief 1: Inkomensongelijkheid<a class="anchor-link" href="#Perspectief-1:-Inkomensongelijkheid">¶</a></h2><p>Grote verschillen tussen top en basis versterken statusangst, wantrouwen en het gevoel er niet bij te horen.<br/>
-Die psychosociale stressoren werken als stille sluipers:<br/>
-ze verhogen chronische ontevredenheid en dragen bij aan depressieve gevoelens los van absolute armoede.</p>
+<h2 id="Perspectief-1:-Inkomensongelijkheid">Perspectief 1: Inkomensongelijkheid<a class="anchor-link" href="#Perspectief-1:-Inkomensongelijkheid">¶</a></h2><p>Grote verschillen tussen top en basis versterken statusangst, wantrouwen en het gevoel er niet bij te horen.<br>
+Die psychosociale stressoren werken als stille sluipers:<br>
+ze verhogen chronische ontevredenheid en dragen bij aan depressieve gevoelens los van absolute armoede.</br></br></p>
 </div>
 </div>
 </div>
@@ -8576,17 +8577,17 @@ ze verhogen chronische ontevredenheid en dragen bij aan depressieve gevoelens lo
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="Gebruikte-datasets">Gebruikte datasets<a class="anchor-link" href="#Gebruikte-datasets">¶</a></h3><ul>
-<li><p><strong>CPDS (Comparative Political Data Set)</strong><br/>
-Bron: University of Bern<br/>
-Relevante variabelen: de Gini-coëfficiënt per land/jaar (een maat voor inkomensongelijkheid).</p>
+<li><p><strong>CPDS (Comparative Political Data Set)</strong><br>
+Bron: University of Bern<br>
+Relevante variabelen: de Gini-coëfficiënt per land/jaar (een maat voor inkomensongelijkheid).</br></br></p>
 </li>
-<li><p><strong>Burden of Disease – Depressive Disorders (DALY)</strong><br/>
-Bron: OurWorldInData<br/>
-Relevante variabelen: Depressieve stoornissen, gemeten in DALYs per 100.000 inwoners (age-standardized, both sexes)</p>
+<li><p><strong>Burden of Disease – Depressive Disorders (DALY)</strong><br>
+Bron: OurWorldInData<br>
+Relevante variabelen: Depressieve stoornissen, gemeten in DALYs per 100.000 inwoners (age-standardized, both sexes)</br></br></p>
 </li>
-<li><p><strong>Happiness (Cantril Ladder Score)</strong><br/>
+<li><p><strong>Happiness (Cantril Ladder Score)</strong><br>
 Bron: OurWorldInData<br/>
-Relevante variabelen: Zelfgerapporteerd geluk (score van 0–10) per land/jaar.</p>
+Relevante variabelen: Zelfgerapporteerd geluk (score van 0–10) per land/jaar.</br></p>
 </li>
 </ul>
 <h2 id="Preprocessing-stappen">Preprocessing stappen<a class="anchor-link" href="#Preprocessing-stappen">¶</a></h2><ol>
@@ -8609,7 +8610,7 @@ Relevante variabelen: Zelfgerapporteerd geluk (score van 0–10) per land/jaar.<
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Dataset inladen</span>
@@ -8653,7 +8654,7 @@ Relevante variabelen: Zelfgerapporteerd geluk (score van 0–10) per land/jaar.<
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8739,7 +8740,7 @@ Relevante variabelen: Zelfgerapporteerd geluk (score van 0–10) per land/jaar.<
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">correlaties</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">'gini'</span><span class="p">,</span> <span class="s1">'depression_daly'</span><span class="p">,</span> <span class="s1">'ladder_score'</span><span class="p">]]</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">'pearson'</span><span class="p">)</span>
@@ -8782,7 +8783,7 @@ ladder_score    -0.178575         0.385452      1.000000
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Gemiddelde depressie per ongelijkheidsgroep</span>
@@ -8812,10 +8813,8 @@ ladder_score    -0.178575         0.385452      1.000000
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/tmp/ipykernel_261783/1730292026.py:2: FutureWarning:
-
-The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
-
+<pre>/tmp/ipykernel_267026/1730292026.py:2: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  depr_per_group = mean_df.groupby('gini_group')['depression_daly'].mean()
 </pre>
 </div>
 </div>
@@ -8873,7 +8872,7 @@ Mensen investeren minder in publieke goederen, wat leidt tot vervreemding en een
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Gemiddelde geluksscore per ongelijkheidsgroep</span>
@@ -8902,10 +8901,8 @@ Mensen investeren minder in publieke goederen, wat leidt tot vervreemding en een
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/tmp/ipykernel_261783/3106146447.py:2: FutureWarning:
-
-The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
-
+<pre>/tmp/ipykernel_267026/3106146447.py:2: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  geluk_per_group = mean_df.groupby('gini_group')['ladder_score'].mean()
 </pre>
 </div>
 </div>
@@ -8927,7 +8924,7 @@ The default of observed=False is deprecated and will be changed to True in a fut
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Gemiddeldes per groep</span>
@@ -8975,17 +8972,13 @@ The default of observed=False is deprecated and will be changed to True in a fut
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/tmp/ipykernel_261783/182604837.py:2: FutureWarning:
-
-The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
-
-/tmp/ipykernel_261783/182604837.py:15: FutureWarning:
-
-
+<pre>/tmp/ipykernel_267026/182604837.py:2: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  group_means = mean_df.groupby('gini_group')[['ladder_score', 'depression_daly']].mean().reset_index()
+/tmp/ipykernel_267026/182604837.py:15: FutureWarning: 
 
 Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `x` variable to `hue` and set `legend=False` for the same effect.
 
-
+  g = sns.catplot(
 </pre>
 </div>
 </div>
@@ -9051,7 +9044,7 @@ Maakt het mogelijk om per land te bepalen hoe gelukkig mensen zich voelen, en da
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -9106,7 +9099,7 @@ Deze kolom wordt hernoemd naar <code>"Very Important %"</code> om de interpretat
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Pad naar politieke dataset</span>
@@ -9136,7 +9129,7 @@ Deze kolom wordt hernoemd naar <code>"Very Important %"</code> om de interpretat
 <pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
-<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[13]</span><span class="ansi-green-fg">, line 3</span>
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[11]</span><span class="ansi-green-fg">, line 3</span>
 <span class="ansi-green-fg">      1</span> <span style="color: rgb(95,135,135)"># Pad naar politieke dataset</span>
 <span class="ansi-green-fg">      2</span> politiek_path = <span class="ansi-yellow-fg">"</span><span class="ansi-yellow-fg">data/how-important-politics-is-in-your-life.csv</span><span class="ansi-yellow-fg">"</span>
 <span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">3</span> df_pol = <span class="ansi-yellow-bg">pd</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">read_csv</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">politiek_path</span><span class="ansi-yellow-bg">)</span>
