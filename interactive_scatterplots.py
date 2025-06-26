@@ -5,6 +5,10 @@ import numpy as np
 from scipy import stats
 import plotly.graph_objects as go
 
+###########################################################################################
+# Scatterplot 1
+###########################################################################################
+
 # Dataset laden
 df = pd.read_csv("alcohol vs happiness/data/merged_all.csv")
 
@@ -140,6 +144,10 @@ fig.show()
 
 fig.write_html("docs/scatter1.html", include_plotlyjs="cdn")
 
+
+###########################################################################################
+# Scatterplot 2
+###########################################################################################
 # Opschonen
 df_clean = df[["Entity", "Year", "Alcohol_consumption", "Cantril ladder score"]].dropna()
 
